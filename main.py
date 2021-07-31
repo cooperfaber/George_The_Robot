@@ -38,15 +38,16 @@ class GeorgeBot(discord.Client):
     @moses.command()
     #plays song
     async def play(channel, url):
-        #try:
-        server = channel.guild
-        voice_channel = server.voice_client
-        async with channel.typing():
-            filename = await music.YTDLSource.from_url("https://www.youtube.com/watch?v=8mHKHKR8x6A", loop=None)
-            voice_channel.play(discord.FFmpegPCMAudio(executable="ffmpeg.exe", source=filename))
-        await channel.send('**Now playing:** {}'.format(filename))
-        #except:
-        #    pass
+        try:
+            server = channel.guild
+            voice_channel = server.voice_client
+            #add something here to fix broken pipe
+            async with channel.typing():
+                filename = await music.YTDLSource.from_url("https://www.youtube.com/watch?v=8mHKHKR8x6A", loop=None)
+                voice_channel.play(discord.FFmpegPCMAudio(source=filename))
+            await channel.send('**Now playing:** {}'.format(filename))
+        except:
+            pass
 
 
 
