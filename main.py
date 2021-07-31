@@ -15,13 +15,13 @@ class GeorgeBot(discord.Client):
 
     #command definition
     @moses.command()
-    async def join(ctx):
-        channel = ctx.author.voice.channel
+    async def join(message):
+        channel = message.author.voice.channel
         await channel.connect()
 
     @moses.command()
-    async def leave(ctx):
-        await ctx.voice_client.disconnect()
+    async def leave(message):
+        await message.voice_client.disconnect()
 
 
 
@@ -35,7 +35,7 @@ class GeorgeBot(discord.Client):
                 "Skynet Online",
                 "Preparing Arnold for a presidential run"
             ]
-            status = stati[random.randrange(0, (len(stati) - 1), 1)]
+            status = stati[random.randrange(0, (len(stati)), 1)]
             print ("Starting with status "+ status)
             game = discord.Game(status)
             await client.change_presence(status=discord.Status.online, activity=game)
@@ -46,6 +46,17 @@ class GeorgeBot(discord.Client):
             channel = message.channel
             await channel.send("i live to serve")
             await client.join(message)
+            
+        if message.content.find('die george') >= 0:
+            channel = message.channel
+            await channel.send('going to die now')
+            await channel.send('you have killed me, master')
+            try: 
+                await client.leave(message)
+            except Exception:
+                pass
+            await client.logout()
+            
 
 
 
