@@ -27,10 +27,13 @@ class GeorgeBot(discord.Client):
                 "Skynet Online",
                 "Preparing Arnold for a presidential run"
             ]
-            num = stati[random.randrange(0, (len(stati) - 1), 1)]
-            print ("Starting with status "+ num)
-            game = discord.Game(num)
+            status = stati[random.randrange(0, (len(stati) - 1), 1)]
+            print ("Starting with status "+ status)
+            game = discord.Game(status)
             await client.change_presence(status=discord.Status.online, activity=game)
+
+        
+
 
 
 client = GeorgeBot()
