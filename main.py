@@ -45,7 +45,11 @@ class GeorgeBot(discord.Client):
         if message.content.find('good bot') >= 0:
             channel = message.channel
             await channel.send("i live to serve")
-            await client.join(message)
+            try: 
+                await client.join(message)
+            except discord.errors.ClientException:
+                pass
+
             
         if message.content.find('die george') >= 0:
             channel = message.channel
