@@ -13,7 +13,15 @@ class GeorgeBot(discord.Client):
     #no? biblical references aren't classy any more?
     moses = commands.Bot(command_prefix = '/')
 
+    #command definition
+    @moses.command()
+    async def join(ctx):
+        channel = ctx.author.voice.channel
+        await channel.connect()
 
+    @moses.command()
+    async def leave(ctx):
+        await ctx.voice_client.disconnect()
 
 
 
@@ -32,7 +40,12 @@ class GeorgeBot(discord.Client):
             game = discord.Game(status)
             await client.change_presence(status=discord.Status.online, activity=game)
 
-        
+    @GeorgeBot.event
+    async def on_message(self, message):
+        if message.content.find('good bot') >= 0:
+            channel = message.channel
+            await channel.send("i live to serve")
+            await client.join(message)
 
 
 
