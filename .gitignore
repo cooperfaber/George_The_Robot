@@ -1,3 +1,4 @@
 $ cat .gitignore
 
 confidential.py
+**/__pycache__

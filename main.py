@@ -14,5 +14,24 @@ class GeorgeBot(discord.Client):
     moses = commands.Bot(command_prefix = '/')
 
 
+
+
+
+
+
+
+    #status on launch
+    @GeorgeBot.event
+    async def on_ready(self):
+            stati = [
+                "Skynet Online",
+                "Preparing Arnold for a presidential run"
+            ]
+            num = stati[random.randrange(0, (len(stati) - 1), 1)]
+            print ("Starting with status "+ num)
+            game = discord.Game(num)
+            await client.change_presence(status=discord.Status.online, activity=game)
+
+
 client = GeorgeBot()
 client.run(confidential.token)
