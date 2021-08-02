@@ -10,7 +10,6 @@ import file_IO
 
 random.seed(a=None, version=2)
 
-messageToBeSaved = "Nothing saved"
 
 async def resolveTag(name, storage):
     curr = name
