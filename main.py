@@ -127,6 +127,13 @@ class GeorgeBot(discord.Client):
         if message.content.find('vomit') >= 0:
             channel = message.channel
             await channel.send(self.storage)
+
+        if message.content.find('blargh') >= 0:
+            channel = message.channel
+            await file_IO.loadNames(self.storage)
+            await channel.send("This is all I know")
+            await channel.send(self.storage)
+
              
 
 client = GeorgeBot()
