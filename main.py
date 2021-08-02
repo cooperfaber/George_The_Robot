@@ -10,6 +10,9 @@ import file_IO
 
 random.seed(a=None, version=2)
 
+messageToBeSaved = "Nothing saved"
+
+
 class GeorgeBot(discord.Client):
     GeorgeBot = discord.Client()
     storage = dict()
@@ -51,7 +54,16 @@ class GeorgeBot(discord.Client):
             await channel.send('**Now playing:** {}'.format(filename))
         except:
             pass
+        
+    @moses.command()
+    #Save message
+    async def save(message):
+        messageToBeSaved = message
 
+    @moses.command()
+    #Repeat saved message
+    async def load(message):
+        message.channel.send(messageToBeSaved)
 
 
 
@@ -86,6 +98,7 @@ class GeorgeBot(discord.Client):
             await channel.send('you have killed me, master')
             await client.leave(message)
             await client.logout()
+
 
         if message.content.find('george, learn:') >= 0:
             channel = message.channel
