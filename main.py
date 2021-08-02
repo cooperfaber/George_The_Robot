@@ -12,6 +12,20 @@ random.seed(a=None, version=2)
 
 messageToBeSaved = "Nothing saved"
 
+async def resolveTag(name, storage):
+    curr = name
+    while(True):
+        if curr in storage:
+            hopeful = storage[curr].strip()
+            tag_pattern = '^<@![0-9]+>$'
+            tag_match = re.fullmatch(tag_pattern, hopeful)
+            if tag_match:
+                return hopeful
+            else:
+                curr = hopeful
+        else:
+            #failure condition
+            return curr
 
 class GeorgeBot(discord.Client):
     GeorgeBot = discord.Client()
@@ -134,6 +148,12 @@ class GeorgeBot(discord.Client):
             await channel.send("This is all I know")
             await channel.send(self.storage)
 
+        if message.content.startswith('whois') >= 0:
+            channel = message.channel
+            content = message.content.split(' ')
+            if len(content) == 2:
+                tag = await resolveTag(content[1], self.storage)
+                await channel.send(content[1] + " is " + tag)
              
 
 client = GeorgeBot()
