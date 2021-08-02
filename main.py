@@ -4,7 +4,9 @@ from discord.ext import tasks
 import random
 import confidential
 import music
+import re
 import time
+import file_IO
 
 random.seed(a=None, version=2)
 
@@ -13,6 +15,7 @@ messageToBeSaved = "Nothing saved"
 
 class GeorgeBot(discord.Client):
     GeorgeBot = discord.Client()
+    storage = dict()
     #commands are moses, because of the 10 commdandments
     #no? biblical references aren't classy any more?
     moses = commands.Bot(command_prefix = '/')
@@ -96,18 +99,35 @@ class GeorgeBot(discord.Client):
             await client.leave(message)
             await client.logout()
 
-        if message.content.find('save') >= 0:
+
+        if message.content.find('george, learn:') >= 0:
             channel = message.channel
-            await channel.send('Saved message: ' + message.content)
-            await client.save(message)
-
-        if message.content.find('load') >= 0:
+            await channel.send('I can learn nickname + tag pairs because I am a real boy')
+            content = message.content.split(':')
+            if len(content) != 2:
+                raise IOError
+            pair = content[1].strip()
+            tag_pattern = '^[a-z]+\s(is|=)\s<@![0-9]+>$'
+            str_pattern = '^[a-z]+\s(is|=)\s[a-z]+$'
+            tag_match = re.fullmatch(tag_pattern, pair)
+            str_match = re.fullmatch(str_pattern, pair)
+            if tag_match or str_match:
+                values = pair.split(' ')
+                if len(values) != 3:
+                   raise IOError
+                name = values[0]
+                tag = values[2]
+                await file_IO.saveName(name,tag)
+                self.storage[name] = tag
+            else:
+                await channel.send("I'm too smart to understand your nonsense. Please provide commands in the form of:")
+                await channel.send("x = y or x is y")
+                await channel.send("This is what I got from you, a stupid human:" + pair)
+        
+        if message.content.find('vomit') >= 0:
             channel = message.channel
-            await channel.send('Saved message: ' + message.content)
-            await client.load(message)
-            
-
-
+            await channel.send(self.storage)
+             
 
 client = GeorgeBot()
 client.run(confidential.token)
