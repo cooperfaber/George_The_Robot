@@ -2,4 +2,5 @@ $ cat .gitignore
 
 confidential.py
 *.webm
+*.txt
 **/__pycache__
