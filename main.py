@@ -8,6 +8,9 @@ import time
 
 random.seed(a=None, version=2)
 
+messageToBeSaved = "Nothing saved"
+
+
 class GeorgeBot(discord.Client):
     GeorgeBot = discord.Client()
     #commands are moses, because of the 10 commdandments
@@ -48,7 +51,16 @@ class GeorgeBot(discord.Client):
             await channel.send('**Now playing:** {}'.format(filename))
         except:
             pass
+        
+    @moses.command()
+    #Save message
+    async def save(message):
+        messageToBeSaved = message
 
+    @moses.command()
+    #Repeat saved message
+    async def load(message):
+        message.channel.send(messageToBeSaved)
 
 
 
@@ -83,6 +95,16 @@ class GeorgeBot(discord.Client):
             await channel.send('you have killed me, master')
             await client.leave(message)
             await client.logout()
+
+        if message.content.find('save') >= 0:
+            channel = message.channel
+            await channel.send('Saved message: ' + message.content)
+            await client.save(message)
+
+        if message.content.find('load') >= 0:
+            channel = message.channel
+            await channel.send('Saved message: ' + message.content)
+            await client.load(message)
             
 
 
