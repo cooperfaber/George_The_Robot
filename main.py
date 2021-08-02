@@ -70,15 +70,19 @@ class GeorgeBot(discord.Client):
             pass
         
     @moses.command()
-    #Save message
-    async def save(message):
-        messageToBeSaved = message
+    async def activate(channel, quote, delay: int):
+        global spam_loop
+        @tasks.loop(seconds=delay)
+        async def spam_loop(q):
+            await channel.send(q)
+
+        spam_loop.start(quote)
+        await channel.send("say \"george, no more\" to shut me up")
 
     @moses.command()
-    #Repeat saved message
-    async def load(message):
-        message.channel.send(messageToBeSaved)
-
+    async def deactivate(channel):
+        spam_loop.cancel()
+        await channel.send("I'll be quiet now")   
 
 
     #status on launch
@@ -95,18 +99,21 @@ class GeorgeBot(discord.Client):
 
     @GeorgeBot.event
     async def on_message(self, message):
-        if message.content.find('good bot') >= 0:
+        #make sure bot doesn't see itself for 6 more weeks of nuclear winter
+        if message.author.bot:
+            return
+        elif message.content.find('good bot') >= 0:
             channel = message.channel
             await channel.send("i live to serve")
             await client.join(message)
         
-        if message.content.find('voice test') >= 0:
+        elif message.content.find('voice test') >= 0:
             channel = message.channel
             await channel.send("i'm trying my robotic best")
             await client.join(message)
             await client.play(message.channel, message)
 
-        if message.content.find('die george') >= 0:
+        elif message.content.find('die george') >= 0:
             channel = message.channel
             await channel.send('going to die now')
             await channel.send('you have killed me, master')
@@ -114,40 +121,55 @@ class GeorgeBot(discord.Client):
             await client.logout()
 
 
-        if message.content.find('george, learn:') >= 0:
+        elif message.content.find('george, learn:') >= 0:
             channel = message.channel
             await channel.send('I can learn nickname + tag pairs because I am a real boy')
             content = message.content.split(':')
             if len(content) != 2:
                 raise IOError
             pair = content[1].strip()
-            tag_pattern = '^[a-z]+\s(is|=)\s<@![0-9]+>$'
-            str_pattern = '^[a-z]+\s(is|=)\s[a-z]+$'
+            tag_pattern = '^([a-z]|(\s))+\s(is|=)\s<@![0-9]+>$'
+            str_pattern = '^([a-z]|\s)+\s(is|=)\s[a-z]+$'
             tag_match = re.fullmatch(tag_pattern, pair)
             str_match = re.fullmatch(str_pattern, pair)
             if tag_match or str_match:
-                values = pair.split(' ')
-                if len(values) != 3:
+                values = pair.split('is')
+                if len(values) != 2:
+                   values = pair.split('=')
+                if len(values) != 2:
                    raise IOError
-                name = values[0]
-                tag = values[2]
+                name = values[0].strip()
+                tag = values[1].strip()
                 await file_IO.saveName(name,tag)
                 self.storage[name] = tag
+                await channel.send("Success. My gigachad brain now knows that "+name+" is equivalent to "+tag)
             else:
                 await channel.send("I'm too smart to understand your nonsense. Please provide commands in the form of:")
                 await channel.send("x = y or x is y")
                 await channel.send("This is what I got from you, a stupid human:" + pair)
         
-        if message.content.find('vomit') >= 0:
+        elif message.content.find('vomit') >= 0:
             channel = message.channel
             await channel.send(self.storage)
 
-        if message.content.startswith('whois') >= 0:
+        elif message.content.find('whois') >= 0:
             channel = message.channel
             content = message.content.split(' ')
             if len(content) == 2:
                 tag = await resolveTag(content[1], self.storage)
                 await channel.send(content[1] + " is " + tag)
+
+        elif message.content.find('harass') >= 0:
+            channel = message.channel
+            content = message.content.split(' ',1)
+            if len(content) == 2:
+                tag = await resolveTag(content[1], self.storage)
+                await client.activate(channel, "Come here %s I desire your presence" % tag,3)
+
+        elif message.content.find('george, no more') >= 0:
+            channel = message.channel
+            await client.deactivate(channel)
+
              
 
 client = GeorgeBot()
