@@ -113,6 +113,7 @@ class GeorgeBot(discord.Client):
             await client.play(message.channel, message)
 
         elif message.content.find('die george') >= 0:
+            #broken pipe errors
             channel = message.channel
             await channel.send('going to die now')
             await channel.send('you have killed me, master')
@@ -166,38 +167,33 @@ class GeorgeBot(discord.Client):
             content[0] = content[0].replace("harass ", "")
             # Checks the tag isn't already in data.txt
             tag = await resolveTag(content[0], self.storage)
-
+            #set delay if not recieved
             if(len(content) > 1):
                 delay = content[1]
             else:
                 delay = 3
-
             if(any(char.isdigit() for char in tag) and not "," in tag):
                 await channel.send("Did you forget a comma?")
-                
-            # Confirm argument is in accepted range
-            try:
-                val = int(content[1])
-                print(content[1].strip())
-                if(delay < 0):
-                    delay = 3
-                    await channel.send("Delay cannot be less than zero, defaulting to 3 seconds")
-            except IndexError:
-                pass
-            except:
-                await channel.send("The delay must be a positive integer")
-                return
-
-
-
             if len(content) == 1:
-                await client.activate(channel, "Come here %s I desire your presence" % tag)
+                await client.activate(channel, "Come here %s I desire your presence" % tag, delay)
             # Second argument determines how quickly to spam
-            elif len(content) == 2:
-                await client.activate(channel, "%s, I summon thee" % tag, delay)
-            # Third argument assigns a custom message
-            elif len(content) == 3:
-                await client.activate(channel, content[2], delay)
+            elif len(content) >= 2:
+                #confirm delay is valid
+                num_pattern = '^[0-9]+$'
+                delay = delay.strip()
+                num_match = re.fullmatch(num_pattern, delay)
+                if num_match:
+                    delay = int(delay)
+                    if(delay < 0):
+                        delay = 3
+                        await channel.send("Delay cannot be less than zero, defaulting to 3 seconds")
+                    # Third argument assigns a custom message
+                    if(len(content)==3):
+                        await client.activate(channel, content[2], delay)
+                    else:
+                        await client.activate(channel, "%s, I summon thee" % tag, delay)
+                else:
+                    await channel.send("Delay must be a number")
             else:
                 await channel.send("The harass command follows this format: 'harass (person), (delay), (message)'")
 
