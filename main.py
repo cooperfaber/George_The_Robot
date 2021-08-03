@@ -167,27 +167,39 @@ class GeorgeBot(discord.Client):
             # Checks the tag isn't already in data.txt
             tag = await resolveTag(content[0], self.storage)
 
+            if(len(content) > 1):
+                delay = content[1]
+            else:
+                delay = 3
+
+            if(any(char.isdigit() for char in tag) and not "," in tag):
+                await channel.send("Did you forget a comma?")
+                
             # Confirm argument is in accepted range
-            print("Length of content: ")
-            print(len(content))
-            if(len(content) >= 2):
-                print(content[1].isnumeric())
-                if(content[1].isnumeric()):
-                    print("Delay is a number")
-                    if(content[1] < 0):
-                        content[1] = 3
-                        channel.send("Delay cannot be less than zero, defaulting to 3 seconds")
+            try:
+                val = int(content[1])
+                print(content[1].strip())
+                if(delay < 0):
+                    delay = 3
+                    await channel.send("Delay cannot be less than zero, defaulting to 3 seconds")
+            except IndexError:
+                pass
+            except:
+                await channel.send("The delay must be a positive integer")
+                return
+
+
 
             if len(content) == 1:
                 await client.activate(channel, "Come here %s I desire your presence" % tag)
-            # Second argument from harass determines how quickly to spam
+            # Second argument determines how quickly to spam
             elif len(content) == 2:
-                await client.activate(channel, "%s, I summon thee" % tag, int(content[1]))
+                await client.activate(channel, "%s, I summon thee" % tag, delay)
+            # Third argument assigns a custom message
             elif len(content) == 3:
-                await client.activate(channel, content[2], int(content[1]))
+                await client.activate(channel, content[2], delay)
             else:
-                print(len(content))
-                await channel.send("The harass command follows this format: 'harass (person), (seconds between messages), (message)'")
+                await channel.send("The harass command follows this format: 'harass (person), (delay), (message)'")
 
         elif message.content.find('george, no more') >= 0:
             channel = message.channel
