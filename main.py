@@ -69,7 +69,7 @@ class GeorgeBot(discord.Client):
             pass
         
     @moses.command()
-    async def activate(channel, quote, delay: int):
+    async def activate(channel, quote, delay =  3):
         global spam_loop
         @tasks.loop(seconds=delay)
         async def spam_loop(q):
@@ -160,10 +160,34 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('harass') >= 0:
             channel = message.channel
-            content = message.content.split(' ',1)
-            if len(content) == 2:
-                tag = await resolveTag(content[1], self.storage)
-                await client.activate(channel, "Come here %s I desire your presence" % tag,3)
+            # Command separates arguments with a ,
+            content = message.content.split(',')
+            # Strips the "harass " from the tag
+            content[0] = content[0].replace("harass ", "")
+            # Checks the tag isn't already in data.txt
+            tag = await resolveTag(content[0], self.storage)
+
+            # Confirm argument is in accepted range
+            print("Length of content: ")
+            print(len(content))
+            if(len(content) >= 2):
+                print(content[1].isnumeric())
+                if(content[1].isnumeric()):
+                    print("Delay is a number")
+                    if(content[1] < 0):
+                        content[1] = 3
+                        channel.send("Delay cannot be less than zero, defaulting to 3 seconds")
+
+            if len(content) == 1:
+                await client.activate(channel, "Come here %s I desire your presence" % tag)
+            # Second argument from harass determines how quickly to spam
+            elif len(content) == 2:
+                await client.activate(channel, "%s, I summon thee" % tag, int(content[1]))
+            elif len(content) == 3:
+                await client.activate(channel, content[2], int(content[1]))
+            else:
+                print(len(content))
+                await channel.send("The harass command follows this format: 'harass (person), (seconds between messages), (message)'")
 
         elif message.content.find('george, no more') >= 0:
             channel = message.channel
