@@ -26,6 +26,16 @@ async def resolveTag(name, storage):
             #failure condition
             return curr
 
+
+async def delayCheck(delay):
+    num_pattern = '^[0-9]+$'
+    num_match = re.fullmatch(num_pattern, delay)
+    if num_match:
+        return 1
+    else:
+        return -1
+
+
 class GeorgeBot(discord.Client):
     GeorgeBot = discord.Client()
     storage = dict()
@@ -69,7 +79,7 @@ class GeorgeBot(discord.Client):
             pass
         
     @moses.command()
-    async def activate(channel, quote, delay: int):
+    async def activate(channel, quote, delay =  3):
         global spam_loop
         @tasks.loop(seconds=delay)
         async def spam_loop(q):
@@ -113,6 +123,7 @@ class GeorgeBot(discord.Client):
             await client.play(message.channel, message)
 
         elif message.content.find('die george') >= 0:
+            #broken pipe errors
             channel = message.channel
             await channel.send('going to die now')
             await channel.send('you have killed me, master')
@@ -160,10 +171,45 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('harass') >= 0:
             channel = message.channel
-            content = message.content.split(' ',1)
-            if len(content) == 2:
-                tag = await resolveTag(content[1], self.storage)
-                await client.activate(channel, "Come here %s I desire your presence" % tag,3)
+            # Command separates arguments with a ,
+            content = message.content.split(',')
+            # Strips the "harass " from the tag
+            content[0] = content[0].replace("harass ", "")
+            # Checks the tag isn't already in data.txt
+            tag = await resolveTag(content[0], self.storage)
+            #set delay if not recieved
+            if(len(content) > 1):
+                delay = content[1].strip()
+            else:
+                delay = 3
+            if(any(char.isdigit() for char in tag) and not "," in tag):
+                await channel.send("Did you forget a comma?")
+
+            if len(content) == 1:
+                await client.activate(channel, "Come here %s I desire your presence" % tag, delay)
+    
+            # Second argument determines how quickly to spam
+            elif len(content) == 2:
+                #confirm delay is valid
+                retval = await delayCheck(delay)
+                if retval == 1:
+                    delay = int(delay)
+                    await client.activate(channel, "%s, I summon thee" % tag, delay)
+                elif retval == -1:
+                    await channel.send("Delay must be a positive number, defaulting to 3 seconds")
+                    await client.activate(channel,"%s, I summon thee" % tag, 3)
+
+            # Third argument assigns a custom message
+            elif len(content)==3:
+                retval = await delayCheck(delay)
+                if retval == 1:
+                    delay = int(delay)
+                    await client.activate(channel, content[2], delay)
+                elif retval == -1:
+                    await channel.send("Delay must be a positive number, defaulting to 3 seconds")
+                    await client.activate(channel, content[2], 3)
+            else:
+                await channel.send("The harass command follows this format: 'harass (person), (delay), (message)'")
 
         elif message.content.find('george, no more') >= 0:
             channel = message.channel
