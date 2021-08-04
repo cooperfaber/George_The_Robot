@@ -184,6 +184,7 @@ class GeorgeBot(discord.Client):
                 delay = 3
             if(any(char.isdigit() for char in tag) and not "," in tag):
                 await channel.send("Did you forget a comma?")
+
             if len(content) == 1:
                 await client.activate(channel, "Come here %s I desire your presence" % tag, delay)
     
