@@ -26,6 +26,16 @@ async def resolveTag(name, storage):
             #failure condition
             return curr
 
+
+async def delayCheck(delay):
+    num_pattern = '^[0-9]+$'
+    num_match = re.fullmatch(num_pattern, delay)
+    if num_match:
+        return 1
+    else:
+        return -1
+
+
 class GeorgeBot(discord.Client):
     GeorgeBot = discord.Client()
     storage = dict()
@@ -169,31 +179,34 @@ class GeorgeBot(discord.Client):
             tag = await resolveTag(content[0], self.storage)
             #set delay if not recieved
             if(len(content) > 1):
-                delay = content[1]
+                delay = content[1].strip()
             else:
                 delay = 3
             if(any(char.isdigit() for char in tag) and not "," in tag):
                 await channel.send("Did you forget a comma?")
             if len(content) == 1:
                 await client.activate(channel, "Come here %s I desire your presence" % tag, delay)
+    
             # Second argument determines how quickly to spam
-            elif len(content) >= 2:
+            elif len(content) == 2:
                 #confirm delay is valid
-                num_pattern = '^[0-9]+$'
-                delay = delay.strip()
-                num_match = re.fullmatch(num_pattern, delay)
-                if num_match:
+                retval = await delayCheck(delay)
+                if retval == 1:
                     delay = int(delay)
-                    if(delay < 0):
-                        delay = 3
-                        await channel.send("Delay cannot be less than zero, defaulting to 3 seconds")
-                    # Third argument assigns a custom message
-                    if(len(content)==3):
-                        await client.activate(channel, content[2], delay)
-                    else:
-                        await client.activate(channel, "%s, I summon thee" % tag, delay)
-                else:
-                    await channel.send("Delay must be a number")
+                    await client.activate(channel, "%s, I summon thee" % tag, delay)
+                elif retval == -1:
+                    await channel.send("Delay must be a positive number, defaulting to 3 seconds")
+                    await client.activate(channel,"%s, I summon thee" % tag, 3)
+
+            # Third argument assigns a custom message
+            elif len(content)==3:
+                retval = await delayCheck(delay)
+                if retval == 1:
+                    delay = int(delay)
+                    await client.activate(channel, content[2], delay)
+                elif retval == -1:
+                    await channel.send("Delay must be a positive number, defaulting to 3 seconds")
+                    await client.activate(channel, content[2], 3)
             else:
                 await channel.send("The harass command follows this format: 'harass (person), (delay), (message)'")
 
