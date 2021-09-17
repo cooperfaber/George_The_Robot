@@ -52,7 +52,9 @@ class GeorgeBot(discord.Client):
         else:
             channel = message.author.voice.channel
             try:
-                await channel.connect()
+                #save the connection so we can terminate it later
+                global talking 
+                talking = await channel.connect()
             except:
                 pass
 
@@ -60,7 +62,8 @@ class GeorgeBot(discord.Client):
     #leaves voice
     async def leave(message):
         try:
-            await message.voice_client.disconnect()
+            await talking.disconnect()
+            await message.channel.send("I'm out")
         except:
             pass
 
@@ -72,9 +75,15 @@ class GeorgeBot(discord.Client):
             voice_channel = server.voice_client
             #add something here to fix broken pipe
             async with channel.typing():
-                filename = await music.YTDLSource.from_url("https://www.youtube.com/watch?v=8mHKHKR8x6A", loop=None)
+
+                filename = await music.YTDLSource.from_search(url, loop = None)
+                #nested objects are nasty
+                #fucking dictionary of a list of dictionaries
+                result = filename['result'].pop()
+                link = result['link']
+                filename = await music.YTDLSource.from_url(link, loop = None)
                 voice_channel.play(discord.FFmpegPCMAudio(source=filename))
-            await channel.send('**Now playing:** {}'.format(filename))
+            await channel.send('**Now playing:** {}'.format(link))
         except:
             pass
         
@@ -99,7 +108,9 @@ class GeorgeBot(discord.Client):
     async def on_ready(self):
         stati = [
             "Skynet Online",
-            "Preparing Arnold for a presidential run"
+            "Preparing Arnold for a presidential run",
+            "Urinating on Rythm's corpse",
+            "Starting a seance for Groovy"
         ]
         status = stati[random.randrange(0, (len(stati)), 1)]
         print ("Starting with status "+ status)
@@ -116,11 +127,21 @@ class GeorgeBot(discord.Client):
             await channel.send("i live to serve")
             await client.join(message)
         
-        elif message.content.find('voice test') >= 0:
+        elif message.content.find('$p') >= 0:
             channel = message.channel
-            await channel.send("i'm trying my robotic best")
+            content = message.content.split(" ",1) 
+            await channel.send("searching youtube for " + content[1])
             await client.join(message)
-            await client.play(message.channel, message)
+            await client.play(message.channel, content[1])
+
+        elif message.content.find('join') >= 0:
+            channel = message.channel
+            await client.join(message)
+
+        elif message.content.find('$s') >= 0:
+            channel = message.channel
+            await channel.send("song over")
+            await client.leave(message)
 
         elif message.content.find('die george') >= 0:
             #broken pipe errors
@@ -194,7 +215,7 @@ class GeorgeBot(discord.Client):
                 retval = await delayCheck(delay)
                 if retval == 1:
                     delay = int(delay)
-                    await client.activate(channel, "%s, I summon thee" % tag, delay)
+                    await client.activate(channel, "%s cum" % tag, delay)
                 elif retval == -1:
                     await channel.send("Delay must be a positive number, defaulting to 3 seconds")
                     await client.activate(channel,"%s, I summon thee" % tag, 3)
