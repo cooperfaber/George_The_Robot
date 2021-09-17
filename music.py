@@ -1,6 +1,9 @@
 import youtube_dl
 import discord
 import asyncio
+from youtube_dl.utils import date_formats
+from youtubesearchpython.__future__ import *
+
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -39,3 +42,12 @@ class YTDLSource(discord.PCMVolumeTransformer):
             data = data['entries'][0]
         filename = data['title'] if stream else ytdl.prepare_filename(data)
         return filename
+
+    @classmethod
+    async def from_search(cls, url, *, loop=None, stream = False):
+        loop = loop or asyncio.get_event_loop()
+        videosSearch = VideosSearch(url, limit = 1)
+        videosResult = await videosSearch.next()
+        #data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        #filename = ytdl.prepare_filename(data)
+        return videosResult
