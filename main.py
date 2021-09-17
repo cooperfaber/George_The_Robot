@@ -75,12 +75,16 @@ class GeorgeBot(discord.Client):
             voice_channel = server.voice_client
             #add something here to fix broken pipe
             async with channel.typing():
-
-                filename = await music.YTDLSource.from_search(url, loop = None)
-                #nested objects are nasty
-                #fucking dictionary of a list of dictionaries
-                result = filename['result'].pop()
-                link = result['link']
+                tag_pattern = '^(\bhttps:\B).+$'
+                tag_match = re.fullmatch(tag_pattern,url)
+                if not tag_match:
+                    filename = await music.YTDLSource.from_search(url, loop = None)
+                    #nested objects are nasty
+                    #fucking dictionary of a list of dictionaries
+                    result = filename['result'].pop()
+                    link = result['link']
+                else:
+                    link = url
                 filename = await music.YTDLSource.from_url(link, loop = None)
                 voice_channel.play(discord.FFmpegPCMAudio(source=filename))
             await channel.send('**Now playing:** {}'.format(link))
