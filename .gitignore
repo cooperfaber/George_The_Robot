@@ -3,4 +3,5 @@ $ cat .gitignore
 confidential.py
 *.webm
 *.txt
+*.m4a
 **/__pycache__
