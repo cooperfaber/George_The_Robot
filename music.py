@@ -48,6 +48,4 @@ class YTDLSource(discord.PCMVolumeTransformer):
         loop = loop or asyncio.get_event_loop()
         videosSearch = VideosSearch(url, limit = 1)
         videosResult = await videosSearch.next()
-        #data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-        #filename = ytdl.prepare_filename(data)
         return videosResult

@@ -5,3 +5,4 @@ confidential.py
 *.txt
 *.m4a
 **/__pycache__
+*.pem

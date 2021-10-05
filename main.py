@@ -5,6 +5,7 @@ import random
 import confidential
 import music
 import re
+import os
 import time
 import file_IO
 
@@ -71,6 +72,7 @@ class GeorgeBot(discord.Client):
     #plays song
     async def play(channel, url):
         try:
+            global filename
             server = channel.guild
             voice_channel = server.voice_client
             #add something here to fix broken pipe
@@ -104,7 +106,7 @@ class GeorgeBot(discord.Client):
     @moses.command()
     async def deactivate(channel):
         spam_loop.cancel()
-        await channel.send("I'll be quiet now")   
+        await channel.send("I'll be quiet now")
 
 
     #status on launch
@@ -119,6 +121,7 @@ class GeorgeBot(discord.Client):
         status = stati[random.randrange(0, (len(stati)), 1)]
         print ("Starting with status "+ status)
         game = discord.Game(status)
+        await file_IO.loadNames(self.storage)
         await client.change_presence(status=discord.Status.online, activity=game)
 
     @GeorgeBot.event
@@ -130,6 +133,10 @@ class GeorgeBot(discord.Client):
             channel = message.channel
             await channel.send("i live to serve")
             await client.join(message)
+
+        elif message.content.find('gary') >= 0:
+            channel = message.channel
+            await channel.send("gary")
         
         elif message.content.find('$p') >= 0:
             channel = message.channel
@@ -146,6 +153,8 @@ class GeorgeBot(discord.Client):
             channel = message.channel
             await channel.send("song over")
             await client.leave(message)
+            os.remove(filename)
+
 
         elif message.content.find('die george') >= 0:
             #broken pipe errors
@@ -158,30 +167,46 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('george, learn:') >= 0:
             channel = message.channel
-            await channel.send('I can learn nickname + tag pairs because I am a real boy')
             content = message.content.split(':')
             if len(content) != 2:
                 raise IOError
             pair = content[1].strip()
-            tag_pattern = '^([a-z]|(\s))+\s(is|=)\s<@![0-9]+>$'
-            str_pattern = '^([a-z]|\s)+\s(is|=)\s[a-z]+$'
-            tag_match = re.fullmatch(tag_pattern, pair)
-            str_match = re.fullmatch(str_pattern, pair)
-            if tag_match or str_match:
+            match_pattern = '^([a-z]|(<@![0-9]+>)|(\s))+\s(is|=)\s(<@![0-9]+>|[a-z]+)$'
+            str_pattern = '^([a-z]|\s)$'
+            tag_pattern = '(<@![0-9]+>)$'
+            good_learn = False
+            #str_match = re.fullmatch(str_pattern, pair)
+            if re.fullmatch(match_pattern, pair):
                 values = pair.split('is')
                 if len(values) != 2:
                    values = pair.split('=')
                 if len(values) != 2:
                    raise IOError
-                name = values[0].strip()
-                tag = values[1].strip()
-                await file_IO.saveName(name,tag)
-                self.storage[name] = tag
-                await channel.send("Success. My gigachad brain now knows that "+name+" is equivalent to "+tag)
+                #figure out if it's name -> tag or tag -> name
+                first = values[0].strip()
+                second = values[1].strip()
+                #current assumption is that if call is used correctly, no shenanigans
+                #should probably account for shenanigans
+                #call farva
+                if re.fullmatch(tag_pattern,first):
+                    tag = first
+                    name = second
+                    good_learn = True
+                elif re.fullmatch(tag_pattern,second):
+                    name = first
+                    tag = second
+                    good_learn = True
+                if good_learn:
+                    await file_IO.saveName(name,tag)
+                    self.storage[name] = tag
+                    await channel.send("Success. My gigachad brain now knows that "+name+" is equivalent to "+tag)
+                else:
+                    await channel.send("georgy made a fucky wucky. call police")
             else:
-                await channel.send("I'm too smart to understand your nonsense. Please provide commands in the form of:")
-                await channel.send("x = y or x is y")
-                await channel.send("This is what I got from you, a stupid human:" + pair)
+                print(content[1])
+                await channel.send("george no understand")
+                await channel.send("please say x = y or x is y")
+                await channel.send("here's what faulty george brain got : " + pair)
         
         elif message.content.find('vomit') >= 0:
             channel = message.channel
@@ -195,6 +220,16 @@ class GeorgeBot(discord.Client):
                 await channel.send(content[1] + " is " + tag)
 
         elif message.content.find('harass') >= 0:
+            #default string setup
+            #random.randrange(0, (len(crap) - 1), 1)
+            spam_call = ["%s i want to lick ur toesies", 
+            "%s cum", 
+            "%s your very important discord colleagues would like to discuss a business opportunity",
+            "Hello %s I would like to speak to you about your vehicle's extended warranty",
+            "%s, this is George from Social Security Division. Please provide me your full social security number for validation.",
+            "%s please come play games, we need you",
+            "help me %s you are my only hope",
+            "%s"]
             channel = message.channel
             # Command separates arguments with a ,
             content = message.content.split(',')
@@ -207,11 +242,14 @@ class GeorgeBot(discord.Client):
                 delay = content[1].strip()
             else:
                 delay = 3
-            if(any(char.isdigit() for char in tag) and not "," in tag):
-                await channel.send("Did you forget a comma?")
+            
+            #removing this, as it is annoying in practice
+            #general calls are no comma
+            #if(any(char.isdigit() for char in tag) and not "," in tag):
+                #await channel.send("Did you forget a comma?")
 
             if len(content) == 1:
-                await client.activate(channel, "Come here %s I desire your presence" % tag, delay)
+                await client.activate(channel, spam_call[random.randrange(0, (len(spam_call)-1),1)] % tag, delay)
     
             # Second argument determines how quickly to spam
             elif len(content) == 2:
