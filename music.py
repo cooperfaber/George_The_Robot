@@ -1,6 +1,8 @@
 import youtube_dl
 import discord
 import asyncio
+#import vlc
+import pafy
 from youtube_dl.utils import date_formats
 from youtubesearchpython.__future__ import *
 
@@ -10,7 +12,7 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'restrictfilenames': True,
-    'noplaylist': True,
+    'noplaylist': False,
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'logtostderr': False,
