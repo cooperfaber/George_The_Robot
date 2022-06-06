@@ -9,10 +9,7 @@ async def loadNames(storage):
     for line in lines:
         content = line.split(' = ')
         if(len(content) <= 1): 
-            # print("End of file")
-            # print(storage)
             return
-        # print(len(content))
         key = content[0]
         value = content[1]
         storage[key] = value

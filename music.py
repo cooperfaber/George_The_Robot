@@ -1,8 +1,6 @@
 import youtube_dl
 import discord
 import asyncio
-#import vlc
-import pafy
 from youtube_dl.utils import date_formats
 from youtubesearchpython.__future__ import *
 
@@ -37,13 +35,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
-        filename = data['title'] if stream else ytdl.prepare_filename(data)
-        return filename
+        info = ytdl.extract_info(url, download=False)
+        I_URL = info['formats'][0]['url']
+        return I_URL
 
     @classmethod
     async def from_search(cls, url, *, loop=None, stream = False):

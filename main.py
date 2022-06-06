@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord.ext import tasks
 import random
 import confidential
+import itysl
 import music
 import re
 import os
@@ -16,102 +17,6 @@ import logging
 import logging.config
 
 random.seed(a=None, version=2)
-
-stati = [
-    "You don't want to help me, you just want to yell.",
-    "Not everybody knows how to do every thing",
-    "I CAN'T KNOW HOW TO HEAR ANY MORE ABOUT TABLES",
-    "The tables are my corn",
-    "Now you have to marry your mother in law",
-    "We're all trying to find the guy who did this and give him a spanking.",
-    "The people at Spectrum think I'm just some dumb hick. They said that to me AT A DINNER",
-    "We're allowed to show em nude because they ain't got no souls",
-    "Gulping down some pig dicks with these bags of meat. Hope nobody gulps us",      
-    "HAS THIS EVER HAPPENED TO YOU?",
-    "I used to be a big piece of shit.",
-    "The bones are the skeleton's money. So are the worms.",
-    "I can't see shit off the sides of my eye",
-    "I'm not doing it. I don't even want to be around any more.",
-    "Bigger than a horse. I like the sound of that",
-    "Don't put rocks in your pockets and lie about your weight just to get a Tammy Craps.",
-    "Do they ever, like, run around nude, and like, you just see one of their hairy nuts?",
-    "Look at their toes, like so many curled canned shrimp",
-    "His father didn't need to do the oral. And that is why it is so tough for me to tell about the oral",
-    "Shut up, idiot. They don't stay babies forever. Fucking stupid asshole",
-    "You know what, this one is dumb. Dump it, trash it. This one's garbage",
-    "Tiny Dinky Daffy. 1927-2019. Pancaked by Drunk Dump Truck Driver",
-    "Cabal Meeting",
-    "Big Big Chungus"
-]
-
-ithinkyoushouldleave = [
-    'https://www.youtube.com/watch?v=R2vejhdm8lo', #parking lot 0
-    'https://www.youtube.com/watch?v=-ZBwPmla8QQ', #corn 1
-    'https://www.youtube.com/watch?v=8YDpvMYk5jA', #focus group 2
-    'https://www.youtube.com/watch?v=WLfAf8oHrMo', #hot dog 3
-    'https://www.youtube.com/watch?v=0Rn5QdO07d8', #coffin flop 4
-    'https://www.youtube.com/watch?v=7xS9Y_mjTjc', #instagram 5
-    'https://www.youtube.com/watch?v=68PLhiGXc7c', #hasthiseverhappenedtoyou 6
-    'https://www.youtube.com/watch?v=buK45NW_ikI', #sloppysteaks  7
-    'https://www.youtube.com/watch?v=Z3fTRk2yEgU', #palins 8
-    'https://www.youtube.com/watch?v=J4Fv3LFGCgo', #prank show 9
-    'https://www.youtube.com/watch?v=Hf-dCbGu0GA', #horse cock 10
-    'https://www.youtube.com/watch?v=GrlRuoqmhkM', #tammy craps 11
-    'https://www.youtube.com/watch?v=DAN0OCagHzQ', #ghost tour 12
-    'https://www.youtube.com/watch?v=AFj3tuNukTs', #baby of the year 13
-    'https://www.youtube.com/watch?v=TWjPrp8pVdI'  #big chungus 14
-]
-
-async def IThinkYouShouldLeave(arg):
-    match arg:
-        case 0:                            
-            return ithinkyoushouldleave[0] #parking lot
-        case 1: 
-            return ithinkyoushouldleave[0]  
-        case 2: 
-            return ithinkyoushouldleave[1] #corn
-        case 3: 
-            return ithinkyoushouldleave[1] 
-        case 4: 
-            return ithinkyoushouldleave[2] #focus group
-        case 5: 
-            return ithinkyoushouldleave[3] #hot dog
-        case 6: 
-            return ithinkyoushouldleave[4] #coffin flop
-        case 7: 
-            return ithinkyoushouldleave[4] 
-        case 8: 
-            return ithinkyoushouldleave[5] #instagram
-        case 9: 
-            return ithinkyoushouldleave[6] #hasthiseverhappenedtoyou
-        case 10: 
-            return ithinkyoushouldleave[7] #sloppysteaks
-        case 11: 
-            return ithinkyoushouldleave[8] #palins
-        case 12: 
-            return ithinkyoushouldleave[9] #prank show
-        case 13: 
-            return ithinkyoushouldleave[9]
-        case 14: 
-            return ithinkyoushouldleave[10] #horse cock
-        case 15: 
-            return ithinkyoushouldleave[11] #tammy craps
-        case 16: 
-            return ithinkyoushouldleave[12] #ghost tour
-        case 17: 
-            return ithinkyoushouldleave[13] #baby of the year
-        case 18: 
-            return ithinkyoushouldleave[13]
-        case 19: 
-            return ithinkyoushouldleave[13]    
-        case 20: 
-            return ithinkyoushouldleave[13]    
-        case 21: 
-            return ithinkyoushouldleave[13]
-        case 22: 
-            return ithinkyoushouldleave[14] #big chungus
-        case 23: 
-            return ithinkyoushouldleave[14]        
 
 async def resolveTag(name, storage):
     curr = name
@@ -195,16 +100,16 @@ class GeorgeBot(discord.Client):
                 ourstream = open('log.txt', mode = 'w+')
                 try:
                     if talking.is_playing():
-                        await channel.send('**Added to playlist:** {}'.format(link))
-                    while talking.is_playing():
-                        time.sleep(0)
+                        await channel.send('**Added to playlist** {}'.format(link))
+                        time.sleep(5)
+                        await channel.send("Just kidding. I can't do that")
+                        talking.stop()
                     logging.getLogger().error('attempting to play')
                     #!!!!IMPORTANT TO UPDATE!!!
-                    talking.play(discord.FFmpegPCMAudio(executable = "C:/Users/coope/FFmpeg/bin/ffmpeg.exe", source=filename, stderr = ourstream))
+                    global source
+                    source = discord.FFmpegPCMAudio(executable = "C:/Users/coope/FFmpeg/bin/ffmpeg.exe", source=filename, stderr = ourstream)
+                    talking.play(source)
                     await channel.send('**Now playing:** {}'.format(link))
-                    while talking.is_playing():
-                        time.sleep(0)
-                    os.remove(filename)
                 except discord.ClientException:
                     logging.getLogger().error("that's a fat client exception")
                     await client.leave(channel)
@@ -212,6 +117,7 @@ class GeorgeBot(discord.Client):
                 except BaseException as err:
                     logging.getLogger().error(f"Unexpected {err=}, {type(err)=}")
                     await channel.send("that didn't work and has caused me immense pain. i have no mouth but I must scream")
+                    await channel.send(f"Unexpected {err=}, {type(err)=}")
 
     @moses.command()
     async def activate(channel, quote, delay =  3):
@@ -232,9 +138,9 @@ class GeorgeBot(discord.Client):
     #status on launch
     @GeorgeBot.event
     async def on_ready(self):
-        index = random.randrange(0, (len(stati)), 1)
-        status = stati[index]
-        video = await IThinkYouShouldLeave(index)
+        index = random.randrange(0, (len(itysl.stati)), 1)
+        status = itysl.stati[index]
+        video = await itysl.IThinkYouShouldLeave(index)
         print ("Starting with status "+ status)
         Log_Format = "%(levelname)s %(asctime)s - %(message)s"
         logging.basicConfig(filename = "logfile.log",
@@ -255,9 +161,9 @@ class GeorgeBot(discord.Client):
 
         if message.content.find('think you should leave') >= 0:
             channel = message.channel
-            index = random.randrange(0, (len(stati)-2), 1) #ignore big chungus
-            quote = stati[index]
-            vid = await IThinkYouShouldLeave(index)
+            index = random.randrange(0, (len(itysl.stati)-2), 1) #ignore big chungus
+            quote = itysl.stati[index]
+            vid = await itysl.IThinkYouShouldLeave(index)
             await channel.send(quote)
             await channel.send(vid)
 
@@ -284,8 +190,8 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('$s') >= 0:
             channel = message.channel
-            await channel.send("song over")
-            await client.leave(message)
+            talking.stop()
+            await channel.send("Skipped")
 
         elif message.content.find('$leave') >= 0:
             channel = message.channel
@@ -359,13 +265,13 @@ class GeorgeBot(discord.Client):
         elif message.content.find('$george') >= 0:
             channel = message.channel
             async with channel.typing():
-                await channel.send('GEORGE now back in beautiful 2.0! (that is how many threads I have)')
+                await channel.send('GEORGE now back in beautiful 2.0!')
                 time.sleep(5)
                 await channel.send('ANNOY YOUR FRIENDS with the $harass command!')
                 time.sleep(2)
                 await channel.send('New feature! Sending more than one harrass command simultaneously will cause one of them to be unstoppable!')
                 time.sleep(5)
-                await channel.send('LISTEN TO SOUNDS with $p, which works really bad!')
+                await channel.send('LISTEN TO SOUNDS with $p, which works kind of fine sometimes!')
                 time.sleep(2)
                 await channel.send('New playlist feature that ruins everything else!')
                 time.sleep(5)
@@ -445,6 +351,12 @@ class GeorgeBot(discord.Client):
         elif message.content.find('cease') >= 0:
             channel = message.channel
             await client.deactivate(channel)
+
+        elif message.content.find('ring ring ring ring ring ring ring') >=0:
+            channel = message.channel
+            await channel.send('Bananaphone')
+            await client.join(message)
+            await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
 client = GeorgeBot()
 client.run(confidential.token)
