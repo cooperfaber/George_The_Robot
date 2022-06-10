@@ -15,6 +15,8 @@ import time
 import file_IO
 import logging
 import logging.config
+import datetime
+import pytz
 
 random.seed(a=None, version=2)
 
@@ -32,6 +34,17 @@ async def resolveTag(name, storage):
         else:
             #failure condition
             return curr
+
+async def timeConversionTherapy(calzone, currTime, channel):
+    #end my life
+    delta = calzone.utcoffset(None)
+    testzone = datetime.datetime(420,6,9)
+    testzone.replace(tzinfo = Self)
+    paczone = datetime.datetime(420,6,9, tzinfo = datetime.timezone(offset = datetime.timedelta(hours=-7),name = 'self'))
+    easzone = datetime.datetime(420,6,9, tzinfo = datetime.timezone(offset = datetime.timedelta(hours=-4),name = 'EDT'))
+    await channel.send(testzone.fromutc(paczone) + 'in pacific time')
+    await channel.send(calzone.fromutc(calzone - easzone) + 'in eastern time')
+    
 
 
 async def delayCheck(delay):
@@ -358,25 +371,32 @@ class GeorgeBot(discord.Client):
             await client.join(message)
             await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
-        elif re.fullmatch('([0-9])\s?am$',message.content):
+        elif re.fullmatch('(.*)([0-9])\s?am(.*)$',message.content) or re.fullmatch('(.*)([0-9])\s?pm(.*)$',message.content):
             #strip string down to relevant portion (numerical)
             #may need to check for COLON
-            time = 9.5
+            currTime = 9
             channel = message.channel
             #switch case for timezones
             if discord.utils.get(message.author.roles, name = 'PT Timezone'):
                 await channel.send("pt")
-                #stuff
+                calzone = datetime.timezone(datetime.timedelta(hours=-7),name = 'PDT')
+                await timeConversionTherapy(calzone, currTime, channel)
             elif discord.utils.get(message.author.roles, name = 'ET Timezone'):
+                timezone = datetime.timezone(-4,name = 'PDT')
                 await channel.send("et time")
             elif discord.utils.get(message.author.roles, name = 'UK Timezone'):
+                timezone = datetime.timezone(1,name = 'PDT')
                 await channel.send("uk time")
                 #different math
             elif discord.utils.get(message.author.roles, name = 'CET Timezone'):
+                timezone = datetime.timezone(2,name = 'PDT')
                 await channel.send("cet time")
             elif discord.utils.get(message.author.roles, name = 'EET Timezone'):
+                timezone = datetime.timezone(3,name = 'PDT')
                 await channel.send("eet time")
             elif discord.utils.get(message.author.roles, name = 'SAMT Timezone'):
+                timezone = datetime.timezone(4,name = 'PDT')
                 await channel.send("samt time")
+
 client = GeorgeBot()
 client.run(confidential.token)
