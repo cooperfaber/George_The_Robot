@@ -358,5 +358,26 @@ class GeorgeBot(discord.Client):
             await client.join(message)
             await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
-client = GeorgeBot()
-client.run(confidential.token)
+        elif re.fullmatch('([0-9])\s?am$',message.content):
+
+            #strip string down to relevant portion (numerical)
+            #may need to check for COLON
+            time = 9.5
+            channel = message.channel
+            #switch case for timezones
+            if discord.utils.get(message.author.roles, name = 'PT Timezone'):
+                await channel.send("pt")
+                #stuff
+            elif discord.utils.get(message.author.roles, name = 'ET Timezone'):
+                await channel.send("et time")
+            elif discord.utils.get(message.author.roles, name = 'UK Timezone'):
+                await channel.send("uk time")
+                #different math
+            elif discord.utils.get(message.author.roles, name = 'CET Timezone'):
+                await channel.send("cet time")
+            elif discord.utils.get(message.author.roles, name = 'EET Timezone'):
+                await channel.send("eet time")
+            elif discord.utils.get(message.author.roles, name = 'SAMT Timezone'):
+                await channel.send("samt time")
+    client = GeorgeBot()
+    client.run(confidential.token)
