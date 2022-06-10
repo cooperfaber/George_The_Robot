@@ -35,16 +35,19 @@ async def resolveTag(name, storage):
             #failure condition
             return curr
 
-async def timeConversionTherapy(calzone, currTime, channel):
-    #end my life
-    delta = calzone.utcoffset(None)
-    testzone = datetime.datetime(420,6,9)
-    testzone.replace(tzinfo = Self)
-    paczone = datetime.datetime(420,6,9, tzinfo = datetime.timezone(offset = datetime.timedelta(hours=-7),name = 'self'))
-    easzone = datetime.datetime(420,6,9, tzinfo = datetime.timezone(offset = datetime.timedelta(hours=-4),name = 'EDT'))
-    await channel.send(testzone.fromutc(paczone) + 'in pacific time')
-    await channel.send(calzone.fromutc(calzone - easzone) + 'in eastern time')
-    
+async def timeConversionTherapy(currTime, channel):
+    tz_pt = currTime.astimezone(pytz.timezone('US/Pacific'))
+    tz_et = currTime.astimezone(pytz.timezone('US/Eastern'))
+    tz_uk = currTime.astimezone(pytz.timezone('Europe/London'))
+    tz_cet = currTime.astimezone(pytz.timezone('Europe/Amsterdam'))
+    tz_eet = currTime.astimezone(pytz.timezone('EET'))
+    tz_samt = currTime.astimezone(pytz.timezone('Europe/Samara'))
+    await channel.send("Best Coast: " + tz_pt.strftime("%H:%M"))
+    await channel.send("US East: " + tz_et.strftime("%H:%M"))
+    await channel.send("Queen's Domain: " + tz_uk.strftime("%H:%M"))    
+    await channel.send("Het koninkrijk en de geboorteplaats van grote homo's: " + tz_cet.strftime("%H:%M"))
+    await channel.send("Krajina různých tlustých prasat: " + tz_eet.strftime("%H:%M"))
+    await channel.send("Desert time: " + tz_samt.strftime("%H:%M"))
 
 
 async def delayCheck(delay):
@@ -371,32 +374,60 @@ class GeorgeBot(discord.Client):
             await client.join(message)
             await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
-        elif re.fullmatch('(.*)([0-9])\s?am(.*)$',message.content) or re.fullmatch('(.*)([0-9])\s?pm(.*)$',message.content):
-            #strip string down to relevant portion (numerical)
-            #may need to check for COLON
-            currTime = 9
+        elif re.fullmatch('(.*)([0-9]*)\s?(am|pm)(.*)$',message.content):
             channel = message.channel
-            #switch case for timezones
+            #strip string down to relevant portion (numerical)
+            #match to x(a?):y(b?) am/pm format
+            match = re.search('([0-9]*)((:?)([0-9]*?))\s?(am|pm)',message.content)
+            if match:
+                timestr = ''.join(str(x) for x in match.group(0))
+                #timstr 0 is x:ab, 1 is am/pm
+                timestr = timestr.split('am')
+
+                #pm case, add 12 to am
+                if len(timestr) == 1:
+                    timestr = timestr[0].split('pm')
+                    timestr = timestr[0].split(':')
+                    hour = int(timestr[0]) + 12
+                else:
+                    #am time
+                    timestr = timestr[0].split(':')
+                    hour = timestr[0]
+
+                #see if there's a minute arg
+                if len(timestr) > 1:
+                    minute = timestr[1]
+                else:
+                    minute = 0
+            else:
+                #no match, just stop
+                return
+
+            #switch
             if discord.utils.get(message.author.roles, name = 'PT Timezone'):
-                await channel.send("pt")
-                calzone = datetime.timezone(datetime.timedelta(hours=-7),name = 'PDT')
-                await timeConversionTherapy(calzone, currTime, channel)
+                tzinfo = pytz.timezone('US/Pacific')
+                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                await timeConversionTherapy(currTime, channel)
             elif discord.utils.get(message.author.roles, name = 'ET Timezone'):
-                timezone = datetime.timezone(-4,name = 'PDT')
-                await channel.send("et time")
+                tzinfo = pytz.timezone('US/Eastern')
+                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                await timeConversionTherapy(currTime, channel)
             elif discord.utils.get(message.author.roles, name = 'UK Timezone'):
-                timezone = datetime.timezone(1,name = 'PDT')
-                await channel.send("uk time")
-                #different math
+                tzinfo = pytz.timezone('UK/London')
+                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                await timeConversionTherapy(currTime, channel)
             elif discord.utils.get(message.author.roles, name = 'CET Timezone'):
-                timezone = datetime.timezone(2,name = 'PDT')
-                await channel.send("cet time")
+                tzinfo = pytz.timezone('Europe/Amsterdam')
+                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                await timeConversionTherapy(currTime, channel)
             elif discord.utils.get(message.author.roles, name = 'EET Timezone'):
-                timezone = datetime.timezone(3,name = 'PDT')
-                await channel.send("eet time")
+                tzinfo = pytz.timezone('EET')
+                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                await timeConversionTherapy(currTime, channel)
             elif discord.utils.get(message.author.roles, name = 'SAMT Timezone'):
-                timezone = datetime.timezone(4,name = 'PDT')
-                await channel.send("samt time")
+                tzinfo = pytz.timezone('Europe/Samara')
+                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                await timeConversionTherapy(currTime, channel)
 
 client = GeorgeBot()
 client.run(confidential.token)
