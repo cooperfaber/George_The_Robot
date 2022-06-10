@@ -359,7 +359,6 @@ class GeorgeBot(discord.Client):
             await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
         elif re.fullmatch('([0-9])\s?am$',message.content):
-
             #strip string down to relevant portion (numerical)
             #may need to check for COLON
             time = 9.5
@@ -379,5 +378,5 @@ class GeorgeBot(discord.Client):
                 await channel.send("eet time")
             elif discord.utils.get(message.author.roles, name = 'SAMT Timezone'):
                 await channel.send("samt time")
-    client = GeorgeBot()
-    client.run(confidential.token)
+client = GeorgeBot()
+client.run(confidential.token)
