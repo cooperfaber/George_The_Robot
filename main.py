@@ -378,9 +378,12 @@ class GeorgeBot(discord.Client):
             channel = message.channel
             #strip string down to relevant portion (numerical)
             #match to x(a?):y(b?) am/pm format
-            match = re.search('([0-9]+)((:?)([0-9]*))\s?(am|pm)',message.content)
-            if match:
-                timestr = ''.join(str(x) for x in match.group(0))
+            matches = re.finditer('([0-9]+)((:?)([0-9]*))\s?(am|pm)',message.content)
+            i = 0
+            for aMatch in matches:
+                timestr = ''
+                timestr = ''.join(str(x) for x in aMatch.group(0))
+                i=i+1
                 #timstr 0 is x:ab, 1 is am/pm
                 timestr = timestr.split('am')
 
@@ -399,35 +402,32 @@ class GeorgeBot(discord.Client):
                     minute = timestr[1]
                 else:
                     minute = 0
-            else:
-                #no match, just stop
-                return
+                #switch
+                if discord.utils.get(message.author.roles, name = 'PT Timezone'):
+                    tzinfo = pytz.timezone('US/Pacific')
+                    currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                    await timeConversionTherapy(currTime, channel)
+                elif discord.utils.get(message.author.roles, name = 'ET Timezone'):
+                    tzinfo = pytz.timezone('US/Eastern')
+                    currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                    await timeConversionTherapy(currTime, channel)
+                elif discord.utils.get(message.author.roles, name = 'UK Timezone'):
+                    tzinfo = pytz.timezone('UK/London')
+                    currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                    await timeConversionTherapy(currTime, channel)
+                elif discord.utils.get(message.author.roles, name = 'CET Timezone'):
+                    tzinfo = pytz.timezone('Europe/Amsterdam')
+                    currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                    await timeConversionTherapy(currTime, channel)
+                elif discord.utils.get(message.author.roles, name = 'EET Timezone'):
+                    tzinfo = pytz.timezone('EET')
+                    currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                    await timeConversionTherapy(currTime, channel)
+                elif discord.utils.get(message.author.roles, name = 'SAMT Timezone'):
+                    tzinfo = pytz.timezone('Europe/Samara')
+                    currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
+                    await timeConversionTherapy(currTime, channel)
 
-            #switch
-            if discord.utils.get(message.author.roles, name = 'PT Timezone'):
-                tzinfo = pytz.timezone('US/Pacific')
-                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
-                await timeConversionTherapy(currTime, channel)
-            elif discord.utils.get(message.author.roles, name = 'ET Timezone'):
-                tzinfo = pytz.timezone('US/Eastern')
-                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
-                await timeConversionTherapy(currTime, channel)
-            elif discord.utils.get(message.author.roles, name = 'UK Timezone'):
-                tzinfo = pytz.timezone('UK/London')
-                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
-                await timeConversionTherapy(currTime, channel)
-            elif discord.utils.get(message.author.roles, name = 'CET Timezone'):
-                tzinfo = pytz.timezone('Europe/Amsterdam')
-                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
-                await timeConversionTherapy(currTime, channel)
-            elif discord.utils.get(message.author.roles, name = 'EET Timezone'):
-                tzinfo = pytz.timezone('EET')
-                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
-                await timeConversionTherapy(currTime, channel)
-            elif discord.utils.get(message.author.roles, name = 'SAMT Timezone'):
-                tzinfo = pytz.timezone('Europe/Samara')
-                currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
-                await timeConversionTherapy(currTime, channel)
 
         elif message.content.find('$lang') >= 0:
             channel = message.channel
