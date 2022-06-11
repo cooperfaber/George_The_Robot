@@ -17,6 +17,7 @@ import logging
 import logging.config
 import datetime
 import pytz
+from google_trans_override import google_trans_new
 
 random.seed(a=None, version=2)
 
@@ -185,8 +186,7 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('good bot') >= 0:
             channel = message.channel
-            await channel.send("you mean nothing to me")
-            await client.join(message)
+            await channel.send(itysl.compliment[random.randrange(0,len(itysl.compliment)-1,1)])
 
         elif message.content.find('gary') >= 0:
             channel = message.channel
@@ -428,6 +428,45 @@ class GeorgeBot(discord.Client):
                 tzinfo = pytz.timezone('Europe/Samara')
                 currTime = tzinfo.localize(datetime.datetime(year = 2022, month = 6, day = 9, hour = int(hour), minute = int(minute)))
                 await timeConversionTherapy(currTime, channel)
+
+        elif message.content.find('$lang') >= 0:
+            channel = message.channel
+            await channel.send(google_trans_new.LANGUAGES)
+
+
+        #brief regex breakdown:
+            #() are capturing groups, so the first (\$translate) ensures the string starts with $translate. '\$' is needed as $ is a special character
+            #the '.' captures everything, and the * repeats. (.*) would capture any phrase
+            #(->) captures the -> (obviously). combined with the (.*), this captures everything up to the '->'
+            #(\s?) is an optional space - '\s' is a space, ? is optional
+            #([a-z] matches any lower case alphabetical char. * repeats, then the $ terminates.) this basically reads 'any lower case word ending the string'
+            #regexed
+        elif re.fullmatch('(\$translate)(.*)(->)(\s?)([a-z]*$)', message.content):
+            channel = message.channel
+            #split message into phrase for translation and lang code
+            spacesplit = message.content.split(' ', 1)
+            #spacesplit[0] = $translate, spacesplit[1] is the rest
+            arrowsplit = spacesplit[1].split('->')
+            #arrowsplit[0] = phrase, arrowsplit[1] = lang code
+            lang = str.strip(arrowsplit[1])
+            brucejenner = google_trans_new.google_translator()
+            try:
+                trans = brucejenner.translate(text = str(arrowsplit[0]), lang_tgt = lang)
+            except ValueError as e:
+                await channel.send('george attend top school in south dakota. ' + lang + ' is a made up language and george say that with authority')
+                await channel.send('<@!163862327475699713> \n' + 'Value Error: ' + str(e))
+                return
+            except AttributeError as e:
+                await channel.send("george has shit code. not good.")
+                await channel.send('<@!163862327475699713> \n' + 'AttributeError: ' + str(e))
+                return
+            if trans:
+                await channel.send(trans)
+
+        elif message.content.find('$translate') >= 0:
+            channel = message.channel
+            await channel.send('Usage is $translate (phrase) -> (lang). Use $lang for a list of languages and $help for more info')
+
 
 client = GeorgeBot()
 client.run(confidential.token)
