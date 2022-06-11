@@ -374,11 +374,11 @@ class GeorgeBot(discord.Client):
             await client.join(message)
             await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
-        elif re.fullmatch('(.*)([0-9]*)\s?(am|pm)(.*)$',message.content):
+        elif re.fullmatch('(.*)([0-9]+)\s?(am|pm)(.*)$',message.content):
             channel = message.channel
             #strip string down to relevant portion (numerical)
             #match to x(a?):y(b?) am/pm format
-            match = re.search('([0-9]*)((:?)([0-9]*?))\s?(am|pm)',message.content)
+            match = re.search('([0-9]+)((:?)([0-9]*))\s?(am|pm)',message.content)
             if match:
                 timestr = ''.join(str(x) for x in match.group(0))
                 #timstr 0 is x:ab, 1 is am/pm
