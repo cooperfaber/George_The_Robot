@@ -5,6 +5,7 @@ from typing import Counter
 import discord
 from discord.ext import commands
 from discord.ext import tasks
+import spotit
 import random
 import confidential
 import itysl
@@ -63,11 +64,11 @@ async def queueDeletion(filename, error = None):
         os.remove(filename)
 
 class GeorgeBot(discord.Client):
-    GeorgeBot = discord.Client()
+    GeorgeBot = discord.Client(intents = discord.Intents().all())
     storage = dict()
     #commands are moses, because of the 10 commdandments
     #no? biblical references aren't classy any more?
-    moses = commands.Bot(command_prefix = '/')
+    moses = commands.Bot(command_prefix = '/',intents = discord.Intents().all())
     lineSize = 0
     nextServed = 0
 
@@ -75,21 +76,22 @@ class GeorgeBot(discord.Client):
     #command definition
     @moses.command()
     #joins voice, if message author is in channel
-    async def join(message):
+    async def join(self, message):
         if not message.author.voice:
             await message.channel.send("If you don't join a voice channel I will kill myself on live television")
         else:
             channel = message.author.voice.channel
+            logging.getLogger().error('tryna:' + str(channel.id))
             try:
                 #save the connection so we can terminate it later
                 global talking 
-                talking = await channel.connect()
-            except:
-                pass
+                talking = await channel.connect(reconnect = True)
+            except Exception as err:
+                logging.getLogger().error(f"Unexpected {err=}, {type(err)=}")
 
     @moses.command()
     #leaves voice
-    async def leave(message):
+    async def leave(self, message):
         try:
             await talking.disconnect()
         except:
@@ -97,7 +99,7 @@ class GeorgeBot(discord.Client):
 
     @moses.command()
     #plays song
-    async def play(channel, url):
+    async def play(self, channel, url):
         if talking.is_connected():
             server = channel.guild
             voice_channel = server.voice_client
@@ -137,7 +139,7 @@ class GeorgeBot(discord.Client):
                     await channel.send(f"Unexpected {err=}, {type(err)=}")
 
     @moses.command()
-    async def activate(channel, quote, delay =  3):
+    async def activate(self, channel, quote, delay =  3):
         global spam_loop
         @tasks.loop(seconds=delay)
         async def spam_loop(q):
@@ -147,7 +149,7 @@ class GeorgeBot(discord.Client):
         await channel.send("say cease to shut me up")
 
     @moses.command()
-    async def deactivate(channel):
+    async def deactivate(self, channel):
         spam_loop.cancel()
         await channel.send("I'll be quiet now")
 
@@ -172,9 +174,24 @@ class GeorgeBot(discord.Client):
 
     @GeorgeBot.event
     async def on_message(self, message):
+        aLog = logging.getLogger()
+        aLog.error('message')
         #make sure bot doesn't see itself for 6 more weeks of nuclear winter
         if message.author.bot:
             return
+
+        if message.channel.id == 783612820411121664:
+            #783612820411121664
+            channel = message.channel
+            tag_pattern = '(https:).+$'
+            tag_match = re.fullmatch(tag_pattern,str(message.content))
+            logging.getLogger().error('I smell a song')
+            if tag_match:
+                await spotit.AddPlaylist(message.content)
+                logging.getLogger().error('Added' + str(message.content))
+            else:
+                logging.getLogger().error("Couldn't add" + str(message.content))
+
 
         if message.content.find('think you should leave') >= 0:
             channel = message.channel
@@ -190,19 +207,20 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('gary') >= 0:
             channel = message.channel
+            aLog.error('gary')
             await channel.send("gary")
         
         elif message.content.find('$p') >= 0:
             channel = message.channel
             content = message.content.split(" ",1) 
             await channel.send("searching youtube for " + content[1])
-            await client.join(message)
-            await client.play(message.channel, content[1])
+            await client.join(self, message)
+            await client.play(self, message.channel, content[1])
 
         elif message.content.find('chungus') >= 0:
             channel = message.channel
-            await client.join(message)
-            await client.play(message.channel, 'https://www.youtube.com/watch?v=TWjPrp8pVdI')
+            await client.join(self, message)
+            await client.play(self, message.channel, 'https://www.youtube.com/watch?v=TWjPrp8pVdI')
 
         elif message.content.find('$s') >= 0:
             channel = message.channel
@@ -212,7 +230,7 @@ class GeorgeBot(discord.Client):
         elif message.content.find('$leave') >= 0:
             channel = message.channel
             await channel.send("are you saying you think i should leave?")
-            await client.leave(message)
+            await client.leave(self, message)
 
 
         elif message.content.find('$die george') >= 0:
@@ -220,7 +238,7 @@ class GeorgeBot(discord.Client):
             channel = message.channel
             await channel.send('going to die now')
             await channel.send('you have killed me, master')
-            await client.leave(message)
+            await client.leave(self, message)
             await client.logout()
 
 
@@ -306,9 +324,9 @@ class GeorgeBot(discord.Client):
         elif message.content.find('$help') >=0:
             channel = message.channel
             await channel.send('lol you think I write documentation')
-            await client.join(message)
+            await client.join(self, message)
             if talking.is_connected():
-                await client.play(message.channel, 'https://www.youtube.com/watch?v=8tOsQv-rrEE')
+                await client.play(self, message.channel, 'https://www.youtube.com/watch?v=8tOsQv-rrEE')
             while talking.is_playing():
                 time.sleep(0)
             await client.leave(message)
@@ -366,13 +384,13 @@ class GeorgeBot(discord.Client):
 
         elif message.content.find('cease') >= 0:
             channel = message.channel
-            await client.deactivate(channel)
+            await client.deactivate(self, channel)
 
         elif message.content.find('ring ring ring ring ring ring ring') >=0:
             channel = message.channel
             await channel.send('Bananaphone')
-            await client.join(message)
-            await client.play(channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
+            await client.join(self, message)
+            await client.play(self, channel, url = 'https://www.youtube.com/watch?v=j5C6X9vOEkU')
 
         elif re.fullmatch('(.*)([0-9]+)\s?(am|pm)(.*)$',message.content):
             channel = message.channel
@@ -468,5 +486,5 @@ class GeorgeBot(discord.Client):
             await channel.send('Usage is $translate (phrase) -> (lang). Use $lang for a list of languages and $help for more info')
 
 
-client = GeorgeBot()
+client = GeorgeBot(intents = discord.Intents().all())
 client.run(confidential.token)
